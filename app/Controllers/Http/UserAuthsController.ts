@@ -75,9 +75,9 @@ export default class UserAuthsController {
       const user: Auth = await Auth.create({
         ...payload
       })
-      return response.ok(user)
+      return response.status(201).json(this.apiResponse(true,'User registered successfully!',user))
     }catch(error){
-      response.badRequest(error.message)
+      response.status(400).json(this.apiResponse(false,JSON.stringify(error.messages) || error.message,))
     }
   }
   public async show({ params, response }) {
@@ -126,7 +126,7 @@ export default class UserAuthsController {
       let token = await auth.attempt(payload.email, payload.password, {
         expiresIn: '1d'
       })
-      return response.status(200).json(this.apiResponse(true,'Login successfully!', {token,user}))
+      return response.status(200).json(this.apiResponse(true,'Login successfully!', {...token,user}))
 
     }catch(error){
       response.badRequest(error.messages || error.message)

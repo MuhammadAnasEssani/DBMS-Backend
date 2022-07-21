@@ -10,13 +10,11 @@ export default class UserAddress extends BaseModel {
   public name: string
 
   @column()
-  public mobile_number: number
+  public mobile_number: string
 
   @column()
   public pin_code: number
 
-  @column()
-  public locality: string
 
   @column()
   public address: string
@@ -28,13 +26,7 @@ export default class UserAddress extends BaseModel {
   public state: string
 
   @column()
-  public landmark: string
-
-  @column()
-  public alternate_phone: number
-
-  @column()
-  public address_type: number
+  public country: string
 
   @column()
   public user_id: number

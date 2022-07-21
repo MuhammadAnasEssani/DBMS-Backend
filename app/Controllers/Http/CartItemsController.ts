@@ -1,33 +1,76 @@
 // import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import CartItem from "App/Models/CartItem";
-import {schema} from "@ioc:Adonis/Core/Validator";
+import {rules, schema} from "@ioc:Adonis/Core/Validator";
+import Cart from "App/Models/Cart";
 
 
 export default class CartItemsController {
   cartItemSchema = schema.create({
-    cart_id: schema.number(),
-    product_vendor_id: schema.number(),
-    product_id: schema.number(),
-    qty: schema.number()
+    // cart_id: schema.number(),
+    product_vendor_id: schema.number([
+      rules.exists({
+        table: 'auths', column: 'id'
+      }),
+      rules.unsigned()
+    ]),
+    product_id: schema.number([
+      rules.exists({
+        table: 'products', column: 'id'
+      }),
+      rules.unsigned()
+    ]),
+    qty: schema.number([
+      rules.unsigned()
+    ]),
+    payable_price: schema.number([
+      rules.unsigned()
+    ])
   })
-  public async index({ response }) {
-    try {
-      const cart_items = await CartItem.all()
-        // .query()
-        // .preload('product')
-      return response.ok(cart_items)
-    }catch(error){
-      response.badRequest(error.message)
+  apiResponse(status,message: string, data?: any) {
+    /*
+    * Standard Structured api output
+    * */
+    return {
+      status: status,
+      message,
+      // data: data ? typeof data.toJSON != 'undefined' ? data.toJSON() : data : null
+      data: data || null,
     }
   }
-  public async store({ request, response }) {
+  public async index({ response ,auth}) {
     try {
-      const payload: any = await request.validate({schema: this.cartItemSchema})
-      const cart_item: CartItem = await CartItem.create(payload)
-      return response.ok(cart_item)
+      const user: any = auth.use('api').user;
+      let cart = await Cart.query().where('user_id',user.id).first()
+      if(!cart){
+        return response.status(200).json(this.apiResponse(true,'Cart Items Fetched successfully!',[]))
+      }
+      const cart_items = await CartItem
+        .query()
+        .where('cart_id',cart.id)
+        .preload('product')
+      return response.status(200).json(this.apiResponse(true,'Cart Items Fetched successfully!',cart_items))
     }catch(error){
-      response.badRequest(error.messages)
+      response.status(400).json(this.apiResponse(false,JSON.stringify(error.messages) || error.message,))
+    }
+  }
+  public async store({ request, response,auth }) {
+    try {
+      const user: any = auth.use('api').user;
+      let cart = await Cart.query().where('user_id',user.id).first()
+      if(!cart){
+        cart = await Cart.create({
+          user_id: user.id
+        })
+      }
+      const payload: any = await request.validate({schema: this.cartItemSchema})
+      const cart_item: CartItem = await CartItem.create({
+        cart_id: cart.id,
+        ...payload
+      })
+      return response.status(201).json(this.apiResponse(true,'Cart Item Added successfully!',cart_item))
+    }catch(error){
+      response.status(400).json(this.apiResponse(false,JSON.stringify(error.messages) || error.message,))
     }
   }
   public async show({ params, response }) {

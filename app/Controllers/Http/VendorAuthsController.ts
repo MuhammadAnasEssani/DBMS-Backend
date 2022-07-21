@@ -66,6 +66,30 @@ export default class VendorAuthsController {
       data: data || null,
     }
   }
+  public async getShops({ response }) {
+    try {
+      const shops = await Auth
+        .query()
+        .where('role',Auth.ROLES.VENDOR)
+      return response.status(200).json(this.apiResponse(true,'Shops Fetched successfully!',shops))
+    }catch(error){
+      response.status(400).json(this.apiResponse(false,JSON.stringify(error.messages) || error.message,))
+    }
+  }
+  public async show({ params, response }) {
+    try{
+      const { id }: { id: Number } = params
+      const shop = await Auth
+        .query()
+        .where('role',Auth.ROLES.VENDOR).where('id',id).first()
+      if (!shop) {
+        return response.status(400).json(this.apiResponse(false,'Shop not found'))
+      }
+      return response.status(200).json(this.apiResponse(true,'Shop Fetched successfully!',shop))
+    }catch(error){
+      response.status(400).json(this.apiResponse(false,JSON.stringify(error.messages) || error.message,))
+    }
+  }
   public async store({ request, response }) {
     try {
       const payload: any = await request.validate({schema: this.vendorSchema})

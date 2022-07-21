@@ -35,19 +35,46 @@ Route
     Route.post('vendor-login','vendorAuthsController.login')
     // Route
     //   .group(() => {
-    Route.resource('category', 'categoriesController').middleware({
-      store: ['auth',`role:${Auth.ROLES.VENDOR},${Auth.ROLES.ADMIN}`]
-    })
+    Route.resource('category', 'categoriesController').middleware(
+      {
+        index: ['auth',`role:${Auth.ROLES.VENDOR},${Auth.ROLES.ADMIN}`],
+        store: ['auth',`role:${Auth.ROLES.VENDOR},${Auth.ROLES.ADMIN}`]
+      }
+    )
     // }).middleware(['auth',`role:${Auth.ROLES.VENDOR},${Auth.ROLES.ADMIN}`])
-    Route.resource('product', 'productsController')
+    Route.resource('product', 'productsController').middleware(
+      {
+        index: ['auth',`role:${Auth.ROLES.VENDOR},${Auth.ROLES.ADMIN}`],
+        store: ['auth',`role:${Auth.ROLES.VENDOR},${Auth.ROLES.ADMIN}`]
+      }
+    )
     Route.resource('colour', 'colorsController')
     Route.resource('size', 'sizesController')
-    Route.resource('offer', 'offersController')
+    Route.resource('offer', 'offersController').middleware(
+      {
+        index: ['auth',`role:${Auth.ROLES.VENDOR},${Auth.ROLES.ADMIN}`],
+        store: ['auth',`role:${Auth.ROLES.VENDOR},${Auth.ROLES.ADMIN}`]
+      }
+    )
     Route.resource('cart', 'cartsController')
-    Route.resource('cart-items', 'cartItemsController')
+    Route.resource('cart-items', 'cartItemsController').middleware(
+      {
+        index: ['auth',`role:${Auth.ROLES.USER}`],
+        store: ['auth',`role:${Auth.ROLES.USER}`]
+      }
+    )
     Route.resource('user-address', 'userAddressesController')
-    Route.resource('order', 'ordersController')
+    Route.resource('order', 'ordersController').middleware(
+      {
+        index: ['auth',`role:${Auth.ROLES.USER},${Auth.ROLES.VENDOR},${Auth.ROLES.ADMIN}`],
+        store: ['auth',`role:${Auth.ROLES.USER},${Auth.ROLES.VENDOR},${Auth.ROLES.ADMIN}`]
+      }
+    )
     Route.resource('order-items', 'orderItemsController')
+    Route.get('get-categories','categoriesController.getAllCategories')
+    Route.get('get-offers','offersController.getAllOffers')
+    Route.get('get-products','productsController.getProducts')
+    Route.get('get-shops','vendorAuthsController.getShops')
   })
   .prefix('/api')
 

@@ -9,14 +9,24 @@ export default class ColorsController {
       rules.maxLength(50)
     ])
   })
+  apiResponse(status,message: string, data?: any) {
+    /*
+    * Standard Structured api output
+    * */
+    return {
+      status: status,
+      message,
+      // data: data ? typeof data.toJSON != 'undefined' ? data.toJSON() : data : null
+      data: data || null,
+    }
+  }
   public async index({ response }) {
     try {
       const colours = await Colour
         .query()
-        .preload('product')
-      return response.ok(colours)
+      return response.status(200).json(this.apiResponse(true,'Colour Fetched successfully!',colours))
     }catch(error){
-      response.badRequest(error.message)
+      response.status(400).json(this.apiResponse(false,JSON.stringify(error.messages) || error.message,))
     }
   }
   public async store({ request, response }) {

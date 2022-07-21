@@ -9,6 +9,19 @@ import Offer from "App/Models/Offer";
 import Size from "App/Models/Size";
 
 export default class Product extends BaseModel {
+
+  static  TYPE = {
+    NORMAL : "10",
+    FEATURES: "20"
+  }
+  static  REQUEST_TYPE = {
+    FEATURED : 10,
+    DISCOUNTED: 20,
+    CATEGORY: 30,
+    SHOP: 40,
+    OFFER: 50
+  }
+
   @column({ isPrimary: true })
   public id: number
 
@@ -28,7 +41,7 @@ export default class Product extends BaseModel {
   public discount: number
 
   @column()
-  public created_by_id: number
+  public createdById: number
 
   @column()
   public type: number
@@ -37,7 +50,7 @@ export default class Product extends BaseModel {
   public status: number
 
   @column()
-  public updated_by_id: number
+  public updatedById: number
 
   @manyToMany(() => Category, {
     localKey: 'id',
